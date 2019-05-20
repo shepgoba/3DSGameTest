@@ -17,13 +17,23 @@
 #define YELLOW C2D_Color32(255, 255, 0, 255)
 #define BLACK C2D_Color32(0, 0, 0, 255)
 
+const float gravity = 0.4;
 
-typedef struct Player
+
+typedef struct
 {
     float x;
     float y;
     float width;
     float height;
+
+    float xvel;
+    float yvel;
+    float xvelMin;
+    float yvelMin;
+    float xvelMax;
+    float yvelMax;
+
     u32 color;
 } Player;
 
@@ -34,6 +44,14 @@ Player CreatePlayer(float x, float y, float width, float height, u32 clr)
     tmp.y = y;
     tmp.width = width;
     tmp.height = height;
+
+    tmp.xvel = 0;
+    tmp.yvel = 0;
+    tmp.xvelMin = -8;
+    tmp.xvelMax = 8;
+    tmp.yvelMin = -8;
+    tmp.yvelMax = 8;
+
     tmp.color = clr;
     return tmp;
 }
@@ -42,10 +60,45 @@ void DrawPlayer(Player *p)
 {
     C2D_DrawRectSolid(p->x, p->y, 1, p->width, p->height, p->color);
 }
-void updatePlayer(Player *p)
+void UpdatePlayer(Player *p)
 {
-    p.yvel += gravity;
+    p->yvel += gravity;
+    p->x += p->xvel;
+    p->y += p->yvel;
 }
+
+typedef struct {
+    float x;
+    float y;
+    float width;
+    float height;
+
+    u32 color;
+    const int type;
+} Block;
+Block CreateBlock(float x, float y, float width, float height, int type)
+{
+    Block tmp;
+
+    if (tmp.type == 1)
+    {
+        tmp.color = BLUE;
+    } else {
+        tmp.color = BLACK;
+    }
+
+    tmp.x = x;
+    tmp.y = y;
+    tmp.width = width;
+    tmp.height = height;
+
+    return tmp;
+}
+void DrawBlock(Block *b)
+{
+    C2D_DrawRectSolid(b->x, b->y, 1, b->width, b->height, b->color);
+}
+
 bool keys[32];
 
 int world[WORLD_HEIGHT][WORLD_WIDTH] = {
@@ -120,7 +173,9 @@ int main(int argc, char* argv[])
 		C2D_TargetClear(top, clrClear);
 		C2D_SceneBegin(top);
 
+        UpdatePlayer(&player);
         DrawPlayer(&player);
+
         for (int y = 0; y < WORLD_HEIGHT; y++)
         {
             for (int x = 0; x < WORLD_WIDTH; x++)
@@ -131,6 +186,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
 		C3D_FrameEnd(0);
 
         printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
