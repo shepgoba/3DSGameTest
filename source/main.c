@@ -18,7 +18,7 @@
 #define BLACK C2D_Color32(0, 0, 0, 255)
 
 const float gravity = 0.4;
-
+bool keys[32];
 
 typedef struct
 {
@@ -65,6 +65,15 @@ void UpdatePlayer(Player *p)
     p->yvel += gravity;
     p->x += p->xvel;
     p->y += p->yvel;
+
+    if (keys[KEY_CPAD_LEFT])
+    {
+        p->xvel -= 0.1;
+    }
+    if (keys[KEY_CPAD_RIGHT])
+    {
+        p->xvel += 0.1;
+    }
 }
 
 typedef struct {
@@ -74,13 +83,13 @@ typedef struct {
     float height;
 
     u32 color;
-    const int type;
+    int type;
 } Block;
 Block CreateBlock(float x, float y, float width, float height, int type)
 {
     Block tmp;
 
-    if (tmp.type == 1)
+    if (type == 1)
     {
         tmp.color = BLUE;
     } else {
@@ -94,12 +103,24 @@ Block CreateBlock(float x, float y, float width, float height, int type)
 
     return tmp;
 }
+
 void DrawBlock(Block *b)
 {
     C2D_DrawRectSolid(b->x, b->y, 1, b->width, b->height, b->color);
 }
 
-bool keys[32];
+void CollideBlock(Block *b, Player *p)
+{
+    if (p->x + p->width > b->x && p->x > b->x + b->width && p->y + p->height > b->y && p->y < b->y + b->height)
+    {
+        if (p->yvel > 0)
+        {
+            p->yvel = 0;
+            p->y = b->y - p->height;
+            //printf("\x1b[2;1HCollision & player is falling\x1b[K", C3D_GetProcessingTime()*6.0f);
+        }
+    }
+}
 
 int world[WORLD_HEIGHT][WORLD_WIDTH] = {
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1},
@@ -122,12 +143,12 @@ int world[WORLD_HEIGHT][WORLD_WIDTH] = {
     {0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 };
-//int blocks[];
+
 void handleKeyPresses(u32 *kDown, u32 *kUp, bool k[32])
 {
     for (int i = 0; i < 32; i++)
@@ -143,12 +164,9 @@ void handleKeyPresses(u32 *kDown, u32 *kUp, bool k[32])
     }
 }
 
-
 int main(int argc, char* argv[])
 {
-    //static int x = 0;
-    //static int y = 0;
-    u32 clrClear = C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF);
+    const u32 clrClear = C2D_Color32(0xFF, 0xFF, 0xFF, 0xFF);
 
     gfxInitDefault();
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
@@ -159,6 +177,20 @@ int main(int argc, char* argv[])
     C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
 
     Player player = CreatePlayer(20, 20, 10, 20, RED);
+
+    int blockCount = 0;
+    Block blocks[WORLD_WIDTH * WORLD_HEIGHT];
+    for (int y = 0; y < WORLD_HEIGHT; y++)
+    {
+        for (int x = 0; x < WORLD_WIDTH; x++)
+        {
+            if (world[y][x] == 1)
+            {
+                blocks[blockCount] = CreateBlock(x * 10, y * 10, 10, 10, 1);
+                blockCount++;
+            }
+        }
+    }
 
     while (aptMainLoop())
 	{
@@ -176,22 +208,16 @@ int main(int argc, char* argv[])
         UpdatePlayer(&player);
         DrawPlayer(&player);
 
-        for (int y = 0; y < WORLD_HEIGHT; y++)
+        for (int i = 0; i < blockCount; i++)
         {
-            for (int x = 0; x < WORLD_WIDTH; x++)
-            {
-                if (world[y][x] == 1)
-                {
-                    C2D_DrawRectSolid(x * 10, y * 10, 1, 10, 10, BLUE);
-                }
-            }
+            DrawBlock(&blocks[i]);
+            CollideBlock(&blocks[i], &player);
         }
-
 		C3D_FrameEnd(0);
 
-        printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
-		printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
-		printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
+        //printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
+		//printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
+		//printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
 
 	}
 
