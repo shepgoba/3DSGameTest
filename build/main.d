@@ -97,7 +97,11 @@ main.o: \
  C:/devkitPro/libctru/include/c2d/base.h \
  C:/devkitPro/libctru/include/c2d/spritesheet.h \
  C:/devkitPro/libctru/include/c2d/sprite.h \
- C:/devkitPro/libctru/include/c2d/text.h
+ C:/devkitPro/libctru/include/c2d/text.h \
+ C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/main.h \
+ C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/player.h \
+ C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/block.h \
+ C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/keys.h
 
 C:/devkitPro/libctru/include/citro2d.h:
 
@@ -294,3 +298,11 @@ C:/devkitPro/libctru/include/c2d/spritesheet.h:
 C:/devkitPro/libctru/include/c2d/sprite.h:
 
 C:/devkitPro/libctru/include/c2d/text.h:
+
+C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/main.h:
+
+C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/player.h:
+
+C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/block.h:
+
+C:/Users/baapcgamingM/Documents/Programming/3DS/reet/source/keys.h:
