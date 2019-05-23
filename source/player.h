@@ -1,6 +1,8 @@
 
 typedef struct Player
 {
+    bool jumping;
+
     float x;
     float y;
     float width;
@@ -19,6 +21,9 @@ typedef struct Player
 Player CreatePlayer(float x, float y, float width, float height, u32 clr)
 {
     Player tmp;
+
+    tmp.jumping = false;
+
     tmp.x = x;
     tmp.y = y;
     tmp.width = width;
@@ -39,20 +44,28 @@ void DrawPlayer(Player *p)
 {
     C2D_DrawRectSolid(p->x, p->y, 1, p->width, p->height, p->color);
 }
+
 void UpdatePlayer(Player *p)
 {
     p->yvel += gravity;
     p->x += p->xvel;
     p->y += p->yvel;
-
     p->xvel = clamp(p->xvel, p->xvelMin, p->xvelMax);
+
     if (keys[29])
     {
         p->xvel -= 0.1;
     }
+
     if (keys[28])
     {
         p->xvel += 0.1;
+    }
+
+    if (keys[1] && !p->jumping)
+    {
+        p->yvel = -6;
+        p->jumping = true;
     }
 
     if (!keys[29] && !keys[28])

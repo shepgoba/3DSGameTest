@@ -31,15 +31,40 @@ void DrawBlock(Block *b)
     C2D_DrawRectSolid(b->x, b->y, 1, b->width, b->height, b->color);
 }
 
-void CollideBlock(Block *b, Player *p)
+void CollideBlockY(Block *b, Player *p)
 {
     if (p->x + p->width > b->x && p->x < b->x + b->width && p->y + p->height > b->y && p->y < b->y + b->height)
     {
         if (p->yvel > 0)
         {
+            p->jumping = false;
             p->yvel = 0;
             p->y = b->y - p->height;
-            //printf("\x1b[2;1HCollision & player is falling\x1b[K", C3D_GetProcessingTime()*6.0f);
         }
+
+        if (p->yvel < 0)
+        {
+            p->jumping = true;
+            p->yvel = 0;
+            p->y = b->y + b->height;
+        }
+    }
+}
+
+void CollideBlockX(Block *b, Player *p)
+{
+    if (p->x + p->width > b->x && p->x < b->x + b->width && p->y + p->height > b->y && p->y < b->y + b->height)
+    {
+        /*if (p->xvel > 0)
+        {
+            p->jumping = false;
+            p->yvel = 0;
+            p->y = b->y - p->height;
+        }
+        if (p->xvel < 0) {
+            p->jumping = true;
+            yvel = 0;
+            p->y = b->y + b->height;
+        }*/
     }
 }

@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
 
     int blockCount = 0;
     Block blocks[WORLD_WIDTH * WORLD_HEIGHT];
+    
     for (int y = 0; y < WORLD_HEIGHT; y++)
     {
         for (int x = 0; x < WORLD_WIDTH; x++)
@@ -82,14 +83,11 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < blockCount; i++)
         {
+            CollideBlockY(&blocks[i], &player);
+            //CollideBlockX(&blocks[i], &player);
             DrawBlock(&blocks[i]);
-            CollideBlock(&blocks[i], &player);
         }
 		C3D_FrameEnd(0);
-
-        //printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
-		//printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
-		//printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
 
 	}
 
